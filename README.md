@@ -1,6 +1,20 @@
-# Hello Alpakka
-
+# Hello Alpakka <!-- omit in TOC -->
 A simple example with Scala, Akka and Alpakka
+
+# Table Of Content <!-- omit in TOC -->
+
+- [Requirements](#requirements)
+- [Description](#description)
+- [How the project is built](#how-the-project-is-built)
+  - [Stack](#stack)
+  - [Akka HTTP Server With Producer](#akka-http-server-with-producer)
+  - [Consumer](#consumer)
+- [Running locally](#running-locally)
+  - [Start a kafka cluster using `docker-compose`](#start-a-kafka-cluster-using-docker-compose)
+  - [Start the consumer](#start-the-consumer)
+  - [Start the akka http server](#start-the-akka-http-server)
+  - [Send `POST` request to `http://localhost:8080/hello`](#send-post-request-to-httplocalhost8080hello)
+  - [Check the logs of the consumer app](#check-the-logs-of-the-consumer-app)
 
 # Requirements
 
@@ -16,9 +30,29 @@ There are two apps.
 - **Akka HTTP Server**: it starts a http server exposing and endpoint `/hello`. Sending a GET it will return a hello message. Sending a POST with an empty body, a kafka message will be published in the `event.hello` topic.
 - **Consumer**: it starts a kafka consumer that subscribes to the `event.hello` topic
 
+# How the project is built
+
+## Stack
+
+- [scala](https://www.scala-lang.org/) 2.13.8
+- [Alpakka](https://doc.akka.io/docs/alpakka/current/index.html) 3.0.0
+
+## Akka HTTP Server With Producer
+
+Main class for starting the http server is located in `com.gaston.hello.akka.http.AkkaHttpServerApp`. It doesn't
+contain any complex logic. It just starts the `HTTP Server` exposing the `/hello` endpoint for `GET` and `POST`
+methods. The logic for `POST` method calls to the producer and this one publish a message in a kafka topic. The
+Producer has the logic to send the message.
+
+## Consumer
+
+Main class for starting the consumer is located in `com.gaston.hello.alpakka.kafka.consumer.ConsumerApp`. It creates a
+kafka consumer that subscribes to the `event.hello` topic, which is where the producer is going to be sending messages.
+Once the message is received, this one is logged and that's all.
+
 # Running locally
 
-1. Start a kafka cluster using `docker-compose`
+## Start a kafka cluster using `docker-compose`
 
 ```shell
 docker-compose up -d
@@ -27,14 +61,14 @@ This command will start two containers
 - **zookeper**: port `22181` is exposed
 - **kafka**: port `29092` is exposed
 
-2. Start the consumer
+## Start the consumer
 
 ```shell
 sbt "runMain com.gaston.hello.alpakka.kafka.consumer.ConsumerApp"
 ```
 Once the consumer starts it will try to subscribe to `event.hello` topic
 
-3. Start the akka http server
+## Start the akka http server
 
 ```shell
 sbt "runMain com.gaston.hello.akka.http.AkkaHttpServerApp"
@@ -42,7 +76,7 @@ sbt "runMain com.gaston.hello.akka.http.AkkaHttpServerApp"
 Once the http server is started a http `GET` or `POST` request can be sent to `http://localhost:8080/hello`. Sending a `GET` will
 return a hello message. Sending a `POST` will publish a message in `event.hello` topic and returns a hello message.
 
-4. send `POST` request to `http://localhost:8080/hello`
+## Send `POST` request to `http://localhost:8080/hello`
 
 ```shell
 curl -d "" http://localhost:8080/hello
@@ -50,7 +84,7 @@ curl -d "" http://localhost:8080/hello
 With this command a `http POST request` is sent to the `akka http server`. A message is published in `event.hello`
 topic and a hello message is returned.
 
-5 check the logs of the consumer app
+## Check the logs of the consumer app
 
 Once the `POST request` is sent, a log message should be shown like the following one
 ```log
