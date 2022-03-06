@@ -32,7 +32,10 @@ object AkkaHttpServerApp extends App {
         )
       } ~ post {
         onSuccess(helloProducer.sendHello) { _ =>
-          complete(StatusCodes.Accepted, HttpEntity(ContentTypes.`text/plain(UTF-8)`, "hello sent"))
+          complete(
+            StatusCodes.Accepted,
+            HttpEntity(ContentTypes.`text/plain(UTF-8)`, "hello sent")
+          )
         }
       }
     }
